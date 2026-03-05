@@ -4,7 +4,7 @@ local function getServerToJoin()
     local servers = httpService:JSONDecode(readfile("asset taker/servers.json"))
     local join = nil
     for key, val in servers do
-        if not val then
+        if val == false then
             join = key
         end
     end
