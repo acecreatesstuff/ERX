@@ -10,6 +10,7 @@ local function getServerToJoin()
     end
     servers[join] = true
     writefile("asset taker/servers.json", httpService:JSONEncode(servers))
+    return join
 end
 
 local function joinServer(key)
@@ -20,6 +21,7 @@ local function joinServer(key)
             loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
         ]]
     )
+    print(key)
     print(game:GetService("ReplicatedStorage"):WaitForChild("PrivateServers"):WaitForChild("JoinServer"):InvokeServer(key, false, false))
 end
 
