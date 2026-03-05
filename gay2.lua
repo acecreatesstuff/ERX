@@ -17,7 +17,7 @@ local function joinServer(key)
     local q = queue_on_teleport or queueonteleport or queueteleport
     q(
         [[
-            loadstring(game:HttpGet("https://gist.githubusercontent.com/adamMasMusic/c6ca00d86991b7543c67a76bc5b6bd75/raw/cfce8649c6bb7d891c4a312080fb73059629274b/gay.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay.lua"))()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
         ]]
     )
