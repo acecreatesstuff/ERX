@@ -20,7 +20,7 @@ end
 
 local function checkServerList()
     local existingFiles = listfiles("asset taker")
-    local servers = {}
+    local out = {}
     local key = nil
     local found = false
     for _, file in existingFiles do
@@ -32,10 +32,10 @@ local function checkServerList()
         local servers = game:GetService("ReplicatedStorage").PrivateServers.GetServers:InvokeServer()
         for _, server in servers do
             if type(server) == "table" and server.LiveryPack and not server.Locked and server.TierRequirement == 0 and server.GroupJoin == 0 then
-                servers[server.CurrKey] = false
+                out[server.CurrKey] = false
             end
         end
-        writefile("asset taker/servers.json", httpService:JSONEncode(servers))
+        writefile("asset taker/servers.json", httpService:JSONEncode(out))
     end
     key = getServerToJoin()
     joinServer(key)
