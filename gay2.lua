@@ -15,7 +15,7 @@ local function joinServer()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
         ]]
     )
-    replicatedStorage:WaitForChild("PrivateServers"):WaitForChild("JoinServer"):InvokeServer(key, false, false)
+    game:GetService("ReplicatedStorage"):WaitForChild("PrivateServers"):WaitForChild("JoinServer"):InvokeServer(key, false, false)
 end
 
 local function checkServerList()
@@ -35,7 +35,7 @@ local function checkServerList()
                 servers[server.CurrKey] = false
             end
         end
-        writefile("asset taker/settings.json", httpService:JSONEncode(servers))
+        writefile("asset taker/servers.json", httpService:JSONEncode(servers))
     end
     key = getServerToJoin()
     joinServer(key)
