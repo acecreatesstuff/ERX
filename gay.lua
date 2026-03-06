@@ -686,7 +686,7 @@ local function getJob()
         )
 
     if joinTeam ~= "Success" then
-        notif("Livery taker debug", joinTeam)
+        warn("Livery taker debug", joinTeam)
     end
 end
 
@@ -702,7 +702,7 @@ local function getLiveries()
     if success then
         return outputLiveries(data.liveries)
     else
-        notif("Failed to get livery data!", "Something seems to have gone wrong", 5)
+        warn("Failed to get livery data!", "Something seems to have gone wrong", 5)
         return
     end
 end
