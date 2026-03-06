@@ -174,6 +174,7 @@ local function getImage(imageId, folder, imageName)
         writefile(folder .. "/" .. imageName .. ".png", data)
         return true, data
     else
+        print(folder .. "/" .. imageName .. ".txt")
         writefile(folder .. "/" .. imageName .. ".txt", response.StatusCode .. "\n" .. response.Body)
         return false, response
     end
@@ -498,9 +499,14 @@ local function getCar()
     return true
 end
 
+local starter = nil
 local function isPlayerInOwnCar()
     local seat = char.Humanoid.SeatPart
-    if not seat then 
+    if not seat then
+        if os.time() - starter > 10 then
+            getCar()
+            starter = os.time()
+        end
         return false
     else
         if seat.Parent:GetAttribute("Owner") == lp.Name then
@@ -514,21 +520,22 @@ local function getJob()
     local newsJoin = {"Start", workspace:WaitForChild("JobStarters"):WaitForChild("News Station Worker")}
 
     if game:GetService("ReplicatedStorage"):WaitForChild("FE"):WaitForChild("GetWantedLevel"):InvokeServer(game.Players.LocalPlayer) ~= 0 then
-        notif("Player is wanted!", "Make sure you are not wanted to take liveries.", 5)
+        warn("Player is wanted!", "Make sure you are not wanted to take liveries.")
         return
     end
 
     if game:GetService("Players").LocalPlayer.Team ~= game.Teams.Civilian then
-        notif("Wrong team!", "You need to be a civilian to do this!", 5)
+        warn("Wrong team!", "You need to be a civilian to do this!")
         return
     end
 
     if not getCar() then
-        notif("Failed to get car!", "Make sure to spawn a car.", 5)
+        warn("Failed to get car!", "Make sure to spawn a car.")
     end
 
     task.wait(0.2)
 
+    starter = os.time()
     repeat task.wait() until isPlayerInOwnCar()
 
     --Functions:TeleportTo(workspace:WaitForChild("JobStarters"):WaitForChild("News Station Worker").Main.Position)
