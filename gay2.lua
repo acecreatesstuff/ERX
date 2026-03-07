@@ -37,6 +37,11 @@ local function joinServer(key)
         print(j)
         loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
     end
+    task.wait(60)
+    local c = clearqueueonteleport or clear_teleport_queue
+    c()
+    print(j)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
 end
 
 local function checkServerList()
