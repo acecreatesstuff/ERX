@@ -24,7 +24,14 @@ local function joinServer(key)
         ]]
     )
     print(key)
-    print(game:GetService("ReplicatedStorage"):WaitForChild("PrivateServers"):WaitForChild("JoinServer"):InvokeServer(key, false, false))
+    local j = game:GetService("ReplicatedStorage"):WaitForChild("PrivateServers"):WaitForChild("JoinServer"):InvokeServer(key, false, false)
+    if j == "Success" or j == "Queue" then
+        print(j)
+    else
+        local c = clearqueueonteleport or clear_teleport_queue
+        c()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
+    end
 end
 
 local function checkServerList()
