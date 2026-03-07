@@ -647,6 +647,14 @@ local function isPlayerInOwnCar()
     return false
 end
 
+local function findPlayerCar()
+    for _, car in workspace.Vehicles:GetChildren() do
+        if car:GetAttribute("Owner") == lp.Name then
+            return car
+        end
+    end
+end
+
 local function getJob()
     local newsJoin = {
         "Start",
@@ -678,29 +686,12 @@ local function getJob()
     starter = os.time()
     repeat task.wait() until isPlayerInOwnCar()
 
-    workspace.Vehicles["Chevlon Captain 1992"]:MoveTo(
+    local car = findPlayerCar()
+    car:MoveTo(
         workspace:WaitForChild("JobStarters"):WaitForChild(
             "News Station Worker"
         ).Main.Position
     )
-
-    task.wait()
-    if isPlayerInOwnCar() then
-        workspace.Vehicles["Chevlon Captain 1992"]:MoveTo(
-            workspace:WaitForChild("JobStarters"):WaitForChild(
-                "News Station Worker"
-            ).Main.Position
-        )
-    end
-
-    task.wait(0.2)
-    if isPlayerInOwnCar() then
-        workspace.Vehicles["Chevlon Captain 1992"]:MoveTo(
-            workspace:WaitForChild("JobStarters"):WaitForChild(
-                "News Station Worker"
-            ).Main.Position
-        )
-    end
 
     task.wait(1)
 
