@@ -30,6 +30,7 @@ local function joinServer(key)
     else
         local c = clearqueueonteleport or clear_teleport_queue
         c()
+        print(j)
         loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
     end
 end
