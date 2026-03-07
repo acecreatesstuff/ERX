@@ -655,6 +655,26 @@ local function findPlayerCar()
     end
 end
 
+local function gotoLocation()
+    local atLocation = false
+    repeat
+        local car = findPlayerCar()
+        car:MoveTo(
+            workspace:WaitForChild("JobStarters"):WaitForChild("News Station Worker").Main.Position
+        )
+
+        local p = char.HumanoidRootPart.Position - workspace:WaitForChild("JobStarters"):WaitForChild("News Station Worker").Main.Position
+        if p.Magnitude > 30 then
+            print(p.Magnitude)
+            if not getCar() then
+                warn("Failed to get car!", "Make sure to spawn a car.")
+            end
+        else
+            atLocation = true
+        end
+    until atLocation == true
+end
+
 local function getJob()
     local newsJoin = {
         "Start",
@@ -692,6 +712,8 @@ local function getJob()
             "News Station Worker"
         ).Main.Position
     )
+
+    gotoLocation()
 
     task.wait(1)
 
