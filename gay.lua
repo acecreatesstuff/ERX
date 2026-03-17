@@ -447,22 +447,22 @@ local function formatLiveryData(car, liveryData, category)
             .. string.format(
                 "%-22s %s\n",
                 "  Vehicle Color:",
-                uniqueLivery.vehicleColor
+                uniqueLivery.vehicleColor or "Unknown"
             )
             .. string.format(
                 "%-22s %s\n",
                 "  Livery Color:",
-                uniqueLivery.liveryColor
+                uniqueLivery.liveryColor or "Unknown"
             )
             .. string.format(
                 "%-22s %s\n",
                 "  Livery Transparency:",
-                uniqueLivery.liveryTransparency
+                uniqueLivery.liveryTransparency or "Unknown"
             )
             .. string.format(
                 "%-22s %s\n",
                 "  Approval Status:",
-                uniqueLivery.approved
+                uniqueLivery.approved or "Unknown"
             )
         livery = livery .. unique
         livery = livery .. "  Texture Ids:\n"
