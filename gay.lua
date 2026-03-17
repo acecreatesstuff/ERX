@@ -718,7 +718,7 @@ local function getJob()
     car:MoveTo(
         workspace:WaitForChild("JobStarters"):WaitForChild(
             "News Station Worker"
-        ).Main.Position
+        ):WaitForChild("Main").Position
     )
 
     --task.wait(2)
