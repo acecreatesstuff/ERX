@@ -33,6 +33,7 @@ local function joinServer(key)
         print(j)
     else
         local c = clearqueueonteleport or clear_teleport_queue
+        print(game:GetService("ReplicatedStorage"):WaitForChild("PrivateServers"):WaitForChild("LeaveQueue"):InvokeServer())
         c()
         print(j)
         loadstring(game:HttpGet("https://raw.githubusercontent.com/adamMasMusic/ERX/refs/heads/main/gay2.lua"))()
