@@ -746,7 +746,11 @@ local function getLiveries()
         ):Await()
 
     if success then
-        return outputLiveries(data.liveries)
+        if data.liveries then
+            return outputLiveries(data.liveries)
+        else
+            return "", {}
+        end
     else
         warn(
             "Failed to get livery data!",
