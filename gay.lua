@@ -607,9 +607,9 @@ local function getCar()
 
     if not interaction then return false end
 
-    local spawnCar = { "Chevlon Captain 1992", nil, false, interaction }
+    local spawnCar = { "Falcon Traveller 2003", nil, false, interaction }
     local buyCar = {
-        "Chevlon Captain 1992",
+        "Falcon Traveller 2003",
         Color3.new(
             0.05098039656877518,
             0.4117647409439087,
