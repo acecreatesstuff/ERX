@@ -1,0 +1,225 @@
+game.Loaded:Wait()
+local lp = game:GetService("Players").LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
+
+local httpService = game:GetService("HttpService")
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local vehicles = require(replicatedStorage.Modules.Vehicles)
+local getVehicleSpawnData = require(replicatedStorage.Remotes.Vehicles.GetVehicleSpawnData)
+local liveryDenialReasons = require(replicatedStorage.Modules.LiveryDenialReasons)
+
+local zlibC = game:HttpGet("https://gist.githubusercontent.com/adamMasMusic/14fd3b8ce7ae1c8ca8aa812d417efa2d/raw/7d0ec70796c2213487d7f94b7d44f49ac1fd2157/zlib.lua")
+local LibDeflate = loadstring(zlibC)()
+
+local settings = {
+    download = false,
+    upload = false,
+    robloxApiKey = nil,
+    robloxId = nil,
+    sendToWebhook = false,
+    webhookURL = nil,
+    cookie = ".ROBLOSECURITY=_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_CAEaAhADIhsKBGR1aWQSEzQxNDIwMjg4MjE4MjExOTQyMTEoAw.cPoRURMkQQHh8p1BcPjAVikkyHYbNgGwrVnQobs_LElJszqAETPXQb5tVmNuunC8oMQd0TvjTVCfexel2g3FAqPx5tQwa4wz665mZ5O7LYkHT_F02DusYcqHkkUQsHZGnC1LJo38NzmTzWzWl0wgvh42Cot5Tw7p0Fri57vEsbDRbyW82Dxv7SI4Bt4Iie9Oo2BleCiX1AgeZyRrxPc7TSHlAzWwvUL8BJNleE-AeMo2utJPdeftfMlzq5E2g-Ac3boL5Al4-pwO3eyeHYp82-sg1c8cF6eVCgpZpBA5KcPWpZPLycmPu5iEwnU-7vhYvWK5l4F8ndCvairYS4F5dDmtDrQKzfIWeODAh5ye-kt7wm5gIkCapxrTEn7-0ldWNoduLqqY1tvkqmMl9L350Ivb52T_7jyY7nWlmFlbzZFHIPT1-wI5lDP5gCAB20K3L3dvDZZbCe_Y1ffKWkek7c-oFz3KwP7Uh6NFCMARxzLLGeFQul3J52etoecZTTjygqtNuTzMzwDs7utF--U5WkNO610IOnTXW6RM0-hulxe8dYFCc61OXR_GZk_7tJRYnvrrnVlcFXjNZ5o8J6t7XpTOm7gdvuxnTeLFCoqr1WJ8I6Xsr2o3CkD1GIhVC8kHgT6eB3b-DwIZsB0LdGXCcuEClwQchIWsA8umQvvrZkvTUDCEdyGijdjFyD4LTQvPRCNPYxF7bEICeYPYIg5dqQajUwixRpSYqQqAwXR_7yXJX1K_Q8Ho2lkmKNnEucEdHFVQO02O4ULZEbEKlse4hki3t-iu5ccXiBmpFQMBZKvKUBoK; rbx-ip2=1; RBXSessionTracker=sessionid=2154515d-8b46-4f69-ba33-b7a2a31f07fe; RBXEventTrackerV2=CreateDate=03/21/2026 11:23:32&rbxid=10466406408&browserid=1774110212356001; GuestData=UserID=-1180234211; RBXPaymentsFlowContext=c8bd97ff-dd19-4dc1-b91f-fe37af73d241,; RBXcb=RBXViralAcquisition%3Dfalse%26RBXSource%3Dfalse%26GoogleAnalytics%3Dfalse",
+    cookieValid = false,
+    baseDownloadLocation = "asset taker/"
+}
+
+local categoryMap = {
+    ["JobTrailers"] = "Job",
+    ["Police"] = "Law",
+    ["SheriffTrailers"] = "Law",
+    ["DOT"] = "DOT",
+    ["DOTTrailers"] = "DOT",
+    ["FireTrailers"] = "Fire",
+    ["Sheriff"] = "Law",
+    ["Fire"] = "Fire",
+    ["PoliceTrailers"] = "Law",
+    ["Job"] = "Job"
+}
+
+local serverName, joinCode = nil, nil
+local response, _ = pcall(function()
+    serverName = replicatedStorage.PrivateServers.Info.ServerName.Value
+    joinCode = replicatedStorage.PrivateServers.Info.Code.Value
+end)
+
+if not response then warn("Error: You aren't in a private server") ; return end
+
+local function sanitize(s)
+    s = tostring(s):match("^%s*(.-)%s*$")
+    s = s:gsub('[<>:"/\\|?*]', "_")
+    return s
+end
+
+local safeServerName = sanitize(serverName)
+
+local function testCookie(cookie)
+    local response = request({
+        Url = "https://assetdelivery.roblox.com/v1/asset/?id=116800358210190",
+        Method = "GET",
+        Headers = { ["Cookie"] = cookie }
+    })
+    if tostring(response.StatusCode) ~= "200" then return false else return true end
+end
+
+if testCookie(settings.cookie) then
+    settings.cookieValid = true
+else
+    warn("Invalid cookie")
+    return
+end
+
+local function extractId(template) return template:match("%d+") or template end
+
+local function getColor(color)
+    color = color:split(", ")
+    local newColor = Color3.new(tonumber(color[1]), tonumber(color[2]), tonumber(color[3]))
+    return newColor:ToHex()
+end
+
+local function decompressGzip(data)
+    local byte1, byte2, byte3, byte4 = data:byte(1, 4)
+    if byte1 == 0x89 and byte2 == 0x50 and byte3 == 0x4E and byte4 == 0x47 then return data end
+    if data:byte(1) ~= 0x1F or data:byte(2) ~= 0x8B then return nil, "Not GZIP" end
+    local flags = data:byte(4)
+    local pos = 11
+    if bit32.band(flags, 0x04) ~= 0 then pos = pos + 2 + data:byte(pos) + data:byte(pos + 1) * 256 end
+    if bit32.band(flags, 0x08) ~= 0 then while data:byte(pos) ~= 0 do pos = pos + 1 end pos = pos + 1 end
+    if bit32.band(flags, 0x10) ~= 0 then while data:byte(pos) ~= 0 do pos = pos + 1 end pos = pos + 1 end
+    if bit32.band(flags, 0x02) ~= 0 then pos = pos + 2 end
+    local deflateData = data:sub(pos, #data - 8)
+    local success, result = pcall(function() return LibDeflate.Decompress(deflateData) end)
+    return success and result or nil
+end
+
+local function getImage(imageId, folder, imageName)
+    if not settings.cookieValid then return false, "No valid cookie" end
+    local response = request({
+        Url = "https://assetdelivery.roblox.com/v1/asset/?id=" .. imageId,
+        Method = "GET",
+        Headers = { ["Cookie"] = settings.cookie }
+    })
+    local data = response.Body
+    local contentEncoding = response.Headers["Content-Encoding"] or response.Headers["content-encoding"]
+    if contentEncoding == "gzip" then data = decompressGzip(data) end
+    if not data then return false, "Data empty" end
+    
+    if settings.download then
+        writefile(folder .. "/" .. imageName .. ".png", data)
+    end
+    return true, data
+end
+
+local function getServerData()
+    local serverSettings = replicatedStorage:WaitForChild("PrivateServers"):WaitForChild("GetSettings"):InvokeServer()
+    return {
+        name = serverSettings.Data.Name,
+        code = serverSettings.Data.CurrKey,
+        icon = serverSettings.Data.IconId,
+        rules = serverSettings.Data.Rules,
+        description = serverSettings.Data.Description,
+        teams = serverSettings.Data.CustomTeams,
+        original = serverSettings
+    }
+end
+
+local function makeLiveryTable(car, liveryData, carId)
+    local liveryTable = { ["car"] = car.Name, ["carId"] = carId, ["liveryCount"] = #liveryData, ["liveries"] = {} }
+    for _, livery in ipairs(liveryData) do
+        local outLivery = {
+            name = sanitize(tostring(livery.liveryName)),
+            vehicleColor = tostring(getColor(livery.vehicleColor)),
+            liveryColor = tostring(getColor(livery.liveryColor)),
+            liveryTransparency = tostring(livery.liveryTransparency),
+            ELS = { park = livery.ParkPatterns, stg1 = livery.Stage1Patterns, stg2 = livery.Stage2Patterns, stg3 = livery.Stage3Patterns, color = livery.ELSColor },
+            approved = livery.isApproved == true and "Approved" or liveryDenialReasons[livery.isApproved],
+            textures = {}
+        }
+        for side, id in pairs(livery.textureIds) do outLivery.textures[side] = tostring(id) end
+        table.insert(liveryTable.liveries, outLivery)
+    end
+    return liveryTable
+end
+
+local function getLiveries()
+    local success, data = getVehicleSpawnData:Call("News Station Worker", workspace.VehicleSpawners.NewsStationWorker_Spawners.Stand.SpawnClicker.InteractionAttachment):Await()
+    if success and data.liveries then
+        local liveryTables = {}
+        for team, val in pairs(data.liveries) do
+            liveryTables[team] = {}
+            for car, carData in pairs(val) do
+                local carObj = vehicles.GetCarById(categoryMap[team] or "Civ", tonumber(car))
+                table.insert(liveryTables[team], makeLiveryTable(carObj, carData, car))
+            end
+        end
+        return liveryTables
+    end
+    return {}
+end
+
+local function getUniforms()
+    local uniformTable = {}
+    for _, team in ipairs(replicatedStorage.ReplicatedState.Uniforms:GetChildren()) do
+        uniformTable[team.Name] = {}
+        for _, uniform in ipairs(team:GetChildren()) do
+            if uniform:FindFirstChild("CustomUniform") then
+                uniformTable[team.Name][uniform.Name] = {
+                    shirt = extractId(tostring(uniform.Shirt.ShirtTemplate)),
+                    pants = extractId(tostring(uniform.Pants.PantsTemplate))
+                }
+            end
+        end
+    end
+    return uniformTable
+end
+
+local function getELS() return replicatedStorage.FE.GetCustomELS:InvokeServer() end
+
+local function getMapTemplates()
+    local mapLayouts = {}
+    local layouts = workspace:FindFirstChild("MapLayouts")
+    if not layouts then return {} end
+    for _, template in ipairs(layouts:GetChildren()) do
+        local layoutName = template:GetAttribute("LayoutName") or template.Name
+        mapLayouts[layoutName] = {}
+        local props = template:FindFirstChild("Props")
+        if props then
+            for _, prop in ipairs(props:GetChildren()) do
+                table.insert(mapLayouts[layoutName], {
+                    name = prop:GetAttribute("PropName") or prop.Name,
+                    position = tostring(prop.WorldPivot.Position)
+                })
+            end
+        end
+    end
+    return mapLayouts
+end
+
+-- // MAIN EXECUTION BLOCK \\ --
+task.spawn(function()
+    print("🚀 Starting Full Asset Take...")
+    
+    local serverData = getServerData()
+    local uniformData = getUniforms()
+    local liveryData = getLiveries()
+    local elsData = getELS()
+    local mapData = getMapTemplates()
+
+    local megaData = {
+        ServerInfo = serverData,
+        Uniforms = uniformData,
+        Liveries = liveryData,
+        ELS = elsData,
+        Maps = mapData,
+        ExportTime = os.date("%c")
+    }
+
+    local finalJson = httpService:JSONEncode(megaData)
+
+    if setclipboard then
+        setclipboard(finalJson)
+        print("✅ SUCCESS: Data copied to clipboard! Paste it into your website.")
+    else
+        writefile("asset_export.json", finalJson)
+        print("✅ SUCCESS: Saved to asset_export.json in your workspace folder.")
+    end
+end)
